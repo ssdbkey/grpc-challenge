@@ -1,4 +1,4 @@
-package adder
+package tendermint
 
 import (
 	"context"
@@ -9,8 +9,7 @@ import (
 // GRPCServer struct
 type GRPCServer struct{}
 
-// Add method for calculate X + Y
-func (s *GRPCServer) Add(ctx context.Context, req *api.AddRequest) (*api.AddResponse, error) {
+func (s *GRPCServer) Health(ctx context.Context, req *api.EmptyRequest) (*api.AddResponse, error) {
 	return &api.AddResponse{
 		Result: req.GetX() + req.GetY(),
 	}, nil

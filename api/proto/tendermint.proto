@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "./";
+
+import "google/protobuf/any.proto";
+
+service Tendermint {
+    rpc Health (EmptyRequest) returns (AnyResponse) {}
+}
+
+message EmptyRequest {}
+
+message AnyResponse {
+    google.protobuf.Any resp = 1;
+}
