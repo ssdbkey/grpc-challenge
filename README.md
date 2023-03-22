@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Go `1.11+`
+- Go `1.17+`
 - Go Modules
 
 ## Usage
@@ -26,10 +26,10 @@ make build
 make run
 ```
 
-<!-- - Go to another console session and connect to gRPC server with [Evans](https://github.com/ktr0731/evans) (gRPC client):
+- Go to another console session and connect to gRPC server with [Evans](https://github.com/ktr0731/evans) (gRPC client):
 
 ```console
-evans api/proto/adder.proto -p 8080
+evans api/proto/tendermint.proto -p 8080
 ```
 
-- That's all! -->
+- That's all!

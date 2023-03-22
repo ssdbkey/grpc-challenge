@@ -1,0 +1,1 @@
+protoc -I api/proto/ api/proto/tendermint.proto --go_out=plugins=grpc:pkg

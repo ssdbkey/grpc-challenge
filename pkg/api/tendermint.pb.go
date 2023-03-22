@@ -4,11 +4,17 @@
 // 	protoc        v3.17.3
 // source: tendermint.proto
 
-package __
+package api
 
 import (
+	context "context"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	_ "google.golang.org/protobuf/types/descriptorpb"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -20,14 +26,128 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type EmptyRequest struct {
+// SignedMsgType is a type of signed message in the consensus.
+type SignedMsgType int32
+
+const (
+	SignedMsgType_SIGNED_MSG_TYPE_UNKNOWN SignedMsgType = 0
+	// Votes
+	SignedMsgType_SIGNED_MSG_TYPE_PREVOTE   SignedMsgType = 1
+	SignedMsgType_SIGNED_MSG_TYPE_PRECOMMIT SignedMsgType = 2
+	// Proposals
+	SignedMsgType_SIGNED_MSG_TYPE_PROPOSAL SignedMsgType = 32
+)
+
+// Enum value maps for SignedMsgType.
+var (
+	SignedMsgType_name = map[int32]string{
+		0:  "SIGNED_MSG_TYPE_UNKNOWN",
+		1:  "SIGNED_MSG_TYPE_PREVOTE",
+		2:  "SIGNED_MSG_TYPE_PRECOMMIT",
+		32: "SIGNED_MSG_TYPE_PROPOSAL",
+	}
+	SignedMsgType_value = map[string]int32{
+		"SIGNED_MSG_TYPE_UNKNOWN":   0,
+		"SIGNED_MSG_TYPE_PREVOTE":   1,
+		"SIGNED_MSG_TYPE_PRECOMMIT": 2,
+		"SIGNED_MSG_TYPE_PROPOSAL":  32,
+	}
+)
+
+func (x SignedMsgType) Enum() *SignedMsgType {
+	p := new(SignedMsgType)
+	*p = x
+	return p
+}
+
+func (x SignedMsgType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SignedMsgType) Descriptor() protoreflect.EnumDescriptor {
+	return file_tendermint_proto_enumTypes[0].Descriptor()
+}
+
+func (SignedMsgType) Type() protoreflect.EnumType {
+	return &file_tendermint_proto_enumTypes[0]
+}
+
+func (x SignedMsgType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SignedMsgType.Descriptor instead.
+func (SignedMsgType) EnumDescriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{0}
+}
+
+// BlockIdFlag indicates which BlcokID the signature is for
+type BlockIDFlag int32
+
+const (
+	BlockIDFlag_BLOCK_ID_FLAG_UNKNOWN BlockIDFlag = 0
+	BlockIDFlag_BLOCK_ID_FLAG_ABSENT  BlockIDFlag = 1
+	BlockIDFlag_BLOCK_ID_FLAG_COMMIT  BlockIDFlag = 2
+	BlockIDFlag_BLOCK_ID_FLAG_NIL     BlockIDFlag = 3
+)
+
+// Enum value maps for BlockIDFlag.
+var (
+	BlockIDFlag_name = map[int32]string{
+		0: "BLOCK_ID_FLAG_UNKNOWN",
+		1: "BLOCK_ID_FLAG_ABSENT",
+		2: "BLOCK_ID_FLAG_COMMIT",
+		3: "BLOCK_ID_FLAG_NIL",
+	}
+	BlockIDFlag_value = map[string]int32{
+		"BLOCK_ID_FLAG_UNKNOWN": 0,
+		"BLOCK_ID_FLAG_ABSENT":  1,
+		"BLOCK_ID_FLAG_COMMIT":  2,
+		"BLOCK_ID_FLAG_NIL":     3,
+	}
+)
+
+func (x BlockIDFlag) Enum() *BlockIDFlag {
+	p := new(BlockIDFlag)
+	*p = x
+	return p
+}
+
+func (x BlockIDFlag) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (BlockIDFlag) Descriptor() protoreflect.EnumDescriptor {
+	return file_tendermint_proto_enumTypes[1].Descriptor()
+}
+
+func (BlockIDFlag) Type() protoreflect.EnumType {
+	return &file_tendermint_proto_enumTypes[1]
+}
+
+func (x BlockIDFlag) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use BlockIDFlag.Descriptor instead.
+func (BlockIDFlag) EnumDescriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{1}
+}
+
+// Validator is the type for the validator-set.
+type Validator struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
+
+	Address          string     `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	PubKey           *anypb.Any `protobuf:"bytes,2,opt,name=pub_key,json=pubKey,proto3" json:"pub_key,omitempty"`
+	VotingPower      int64      `protobuf:"varint,3,opt,name=voting_power,json=votingPower,proto3" json:"voting_power,omitempty"`
+	ProposerPriority int64      `protobuf:"varint,4,opt,name=proposer_priority,json=proposerPriority,proto3" json:"proposer_priority,omitempty"`
 }
 
-func (x *EmptyRequest) Reset() {
-	*x = EmptyRequest{}
+func (x *Validator) Reset() {
+	*x = Validator{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tendermint_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -35,13 +155,13 @@ func (x *EmptyRequest) Reset() {
 	}
 }
 
-func (x *EmptyRequest) String() string {
+func (x *Validator) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EmptyRequest) ProtoMessage() {}
+func (*Validator) ProtoMessage() {}
 
-func (x *EmptyRequest) ProtoReflect() protoreflect.Message {
+func (x *Validator) ProtoReflect() protoreflect.Message {
 	mi := &file_tendermint_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -53,21 +173,50 @@ func (x *EmptyRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EmptyRequest.ProtoReflect.Descriptor instead.
-func (*EmptyRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use Validator.ProtoReflect.Descriptor instead.
+func (*Validator) Descriptor() ([]byte, []int) {
 	return file_tendermint_proto_rawDescGZIP(), []int{0}
 }
 
-type AddResponse struct {
+func (x *Validator) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *Validator) GetPubKey() *anypb.Any {
+	if x != nil {
+		return x.PubKey
+	}
+	return nil
+}
+
+func (x *Validator) GetVotingPower() int64 {
+	if x != nil {
+		return x.VotingPower
+	}
+	return 0
+}
+
+func (x *Validator) GetProposerPriority() int64 {
+	if x != nil {
+		return x.ProposerPriority
+	}
+	return 0
+}
+
+// GetBlockByHeightRequest is the request type for the Query/GetBlockByHeight RPC method.
+type GetBlockByHeightRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Result int32 `protobuf:"varint,1,opt,name=result,proto3" json:"result,omitempty"`
+	Height int64 `protobuf:"varint,1,opt,name=height,proto3" json:"height,omitempty"`
 }
 
-func (x *AddResponse) Reset() {
-	*x = AddResponse{}
+func (x *GetBlockByHeightRequest) Reset() {
+	*x = GetBlockByHeightRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_tendermint_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -75,13 +224,13 @@ func (x *AddResponse) Reset() {
 	}
 }
 
-func (x *AddResponse) String() string {
+func (x *GetBlockByHeightRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AddResponse) ProtoMessage() {}
+func (*GetBlockByHeightRequest) ProtoMessage() {}
 
-func (x *AddResponse) ProtoReflect() protoreflect.Message {
+func (x *GetBlockByHeightRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_tendermint_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -93,31 +242,1552 @@ func (x *AddResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AddResponse.ProtoReflect.Descriptor instead.
-func (*AddResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetBlockByHeightRequest.ProtoReflect.Descriptor instead.
+func (*GetBlockByHeightRequest) Descriptor() ([]byte, []int) {
 	return file_tendermint_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *AddResponse) GetResult() int32 {
+func (x *GetBlockByHeightRequest) GetHeight() int64 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+type PartSetHeader struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Total uint32 `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Hash  []byte `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash,omitempty"`
+}
+
+func (x *PartSetHeader) Reset() {
+	*x = PartSetHeader{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PartSetHeader) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PartSetHeader) ProtoMessage() {}
+
+func (x *PartSetHeader) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PartSetHeader.ProtoReflect.Descriptor instead.
+func (*PartSetHeader) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *PartSetHeader) GetTotal() uint32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *PartSetHeader) GetHash() []byte {
+	if x != nil {
+		return x.Hash
+	}
+	return nil
+}
+
+type BlockID struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Hash  []byte         `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty"`
+	Parts *PartSetHeader `protobuf:"bytes,2,opt,name=parts,proto3" json:"parts,omitempty"`
+}
+
+func (x *BlockID) Reset() {
+	*x = BlockID{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BlockID) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BlockID) ProtoMessage() {}
+
+func (x *BlockID) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BlockID.ProtoReflect.Descriptor instead.
+func (*BlockID) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *BlockID) GetHash() []byte {
+	if x != nil {
+		return x.Hash
+	}
+	return nil
+}
+
+func (x *BlockID) GetParts() *PartSetHeader {
+	if x != nil {
+		return x.Parts
+	}
+	return nil
+}
+
+// Data contains the set of transactions included in the block
+type Data struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Txs that will be applied by state @ block.Height+1.
+	// NOTE: not all txs here are valid.  We're just agreeing on the order first.
+	// This means that block.AppHash does not include these txs.
+	Txs [][]byte `protobuf:"bytes,1,rep,name=txs,proto3" json:"txs,omitempty"`
+}
+
+func (x *Data) Reset() {
+	*x = Data{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Data) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Data) ProtoMessage() {}
+
+func (x *Data) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Data.ProtoReflect.Descriptor instead.
+func (*Data) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Data) GetTxs() [][]byte {
+	if x != nil {
+		return x.Txs
+	}
+	return nil
+}
+
+// Consensus captures the consensus rules for processing a block in the blockchain,
+// including all blockchain data structures and the rules of the application's
+// state transition machine.
+type Consensus struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Block string `protobuf:"bytes,1,opt,name=block,proto3" json:"block,omitempty"`
+	App   string `protobuf:"bytes,2,opt,name=app,proto3" json:"app,omitempty"`
+}
+
+func (x *Consensus) Reset() {
+	*x = Consensus{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Consensus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Consensus) ProtoMessage() {}
+
+func (x *Consensus) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Consensus.ProtoReflect.Descriptor instead.
+func (*Consensus) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Consensus) GetBlock() string {
+	if x != nil {
+		return x.Block
+	}
+	return ""
+}
+
+func (x *Consensus) GetApp() string {
+	if x != nil {
+		return x.App
+	}
+	return ""
+}
+
+// Header defines the structure of a block header.
+type Header struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// basic block info
+	Version *Consensus `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	ChainId string     `protobuf:"bytes,2,opt,name=chain_id,json=chainId,proto3" json:"chain_id,omitempty"`
+	Height  string     `protobuf:"bytes,3,opt,name=height,proto3" json:"height,omitempty"`
+	Time    string     `protobuf:"bytes,4,opt,name=time,proto3" json:"time,omitempty"`
+	// prev block info
+	LastBlockId *BlockID `protobuf:"bytes,5,opt,name=last_block_id,json=lastBlockId,proto3" json:"last_block_id,omitempty"`
+	// hashes of block data
+	LastCommitHash []byte `protobuf:"bytes,6,opt,name=last_commit_hash,json=lastCommitHash,proto3" json:"last_commit_hash,omitempty"` // commit from validators from the last block
+	DataHash       []byte `protobuf:"bytes,7,opt,name=data_hash,json=dataHash,proto3" json:"data_hash,omitempty"`                     // transactions
+	// hashes from the app output from the prev block
+	ValidatorsHash     []byte `protobuf:"bytes,8,opt,name=validators_hash,json=validatorsHash,proto3" json:"validators_hash,omitempty"`               // validators for the current block
+	NextValidatorsHash []byte `protobuf:"bytes,9,opt,name=next_validators_hash,json=nextValidatorsHash,proto3" json:"next_validators_hash,omitempty"` // validators for the next block
+	ConsensusHash      []byte `protobuf:"bytes,10,opt,name=consensus_hash,json=consensusHash,proto3" json:"consensus_hash,omitempty"`                 // consensus params for current block
+	AppHash            []byte `protobuf:"bytes,11,opt,name=app_hash,json=appHash,proto3" json:"app_hash,omitempty"`                                   // state after txs from the previous block
+	LastResultsHash    []byte `protobuf:"bytes,12,opt,name=last_results_hash,json=lastResultsHash,proto3" json:"last_results_hash,omitempty"`         // root hash of all results from the txs from the previous block
+	// consensus info
+	EvidenceHash    []byte `protobuf:"bytes,13,opt,name=evidence_hash,json=evidenceHash,proto3" json:"evidence_hash,omitempty"`          // evidence included in the block
+	ProposerAddress []byte `protobuf:"bytes,14,opt,name=proposer_address,json=proposerAddress,proto3" json:"proposer_address,omitempty"` // original proposer of the block
+}
+
+func (x *Header) Reset() {
+	*x = Header{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Header) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Header) ProtoMessage() {}
+
+func (x *Header) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Header.ProtoReflect.Descriptor instead.
+func (*Header) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Header) GetVersion() *Consensus {
+	if x != nil {
+		return x.Version
+	}
+	return nil
+}
+
+func (x *Header) GetChainId() string {
+	if x != nil {
+		return x.ChainId
+	}
+	return ""
+}
+
+func (x *Header) GetHeight() string {
+	if x != nil {
+		return x.Height
+	}
+	return ""
+}
+
+func (x *Header) GetTime() string {
+	if x != nil {
+		return x.Time
+	}
+	return ""
+}
+
+func (x *Header) GetLastBlockId() *BlockID {
+	if x != nil {
+		return x.LastBlockId
+	}
+	return nil
+}
+
+func (x *Header) GetLastCommitHash() []byte {
+	if x != nil {
+		return x.LastCommitHash
+	}
+	return nil
+}
+
+func (x *Header) GetDataHash() []byte {
+	if x != nil {
+		return x.DataHash
+	}
+	return nil
+}
+
+func (x *Header) GetValidatorsHash() []byte {
+	if x != nil {
+		return x.ValidatorsHash
+	}
+	return nil
+}
+
+func (x *Header) GetNextValidatorsHash() []byte {
+	if x != nil {
+		return x.NextValidatorsHash
+	}
+	return nil
+}
+
+func (x *Header) GetConsensusHash() []byte {
+	if x != nil {
+		return x.ConsensusHash
+	}
+	return nil
+}
+
+func (x *Header) GetAppHash() []byte {
+	if x != nil {
+		return x.AppHash
+	}
+	return nil
+}
+
+func (x *Header) GetLastResultsHash() []byte {
+	if x != nil {
+		return x.LastResultsHash
+	}
+	return nil
+}
+
+func (x *Header) GetEvidenceHash() []byte {
+	if x != nil {
+		return x.EvidenceHash
+	}
+	return nil
+}
+
+func (x *Header) GetProposerAddress() []byte {
+	if x != nil {
+		return x.ProposerAddress
+	}
+	return nil
+}
+
+type Evidence struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Types that are assignable to Sum:
+	//	*Evidence_DuplicateVoteEvidence
+	//	*Evidence_LightClientAttackEvidence
+	Sum isEvidence_Sum `protobuf_oneof:"sum"`
+}
+
+func (x *Evidence) Reset() {
+	*x = Evidence{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Evidence) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Evidence) ProtoMessage() {}
+
+func (x *Evidence) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Evidence.ProtoReflect.Descriptor instead.
+func (*Evidence) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{7}
+}
+
+func (m *Evidence) GetSum() isEvidence_Sum {
+	if m != nil {
+		return m.Sum
+	}
+	return nil
+}
+
+func (x *Evidence) GetDuplicateVoteEvidence() *DuplicateVoteEvidence {
+	if x, ok := x.GetSum().(*Evidence_DuplicateVoteEvidence); ok {
+		return x.DuplicateVoteEvidence
+	}
+	return nil
+}
+
+func (x *Evidence) GetLightClientAttackEvidence() *LightClientAttackEvidence {
+	if x, ok := x.GetSum().(*Evidence_LightClientAttackEvidence); ok {
+		return x.LightClientAttackEvidence
+	}
+	return nil
+}
+
+type isEvidence_Sum interface {
+	isEvidence_Sum()
+}
+
+type Evidence_DuplicateVoteEvidence struct {
+	DuplicateVoteEvidence *DuplicateVoteEvidence `protobuf:"bytes,1,opt,name=duplicate_vote_evidence,json=duplicateVoteEvidence,proto3,oneof"`
+}
+
+type Evidence_LightClientAttackEvidence struct {
+	LightClientAttackEvidence *LightClientAttackEvidence `protobuf:"bytes,2,opt,name=light_client_attack_evidence,json=lightClientAttackEvidence,proto3,oneof"`
+}
+
+func (*Evidence_DuplicateVoteEvidence) isEvidence_Sum() {}
+
+func (*Evidence_LightClientAttackEvidence) isEvidence_Sum() {}
+
+// Vote represents a prevote, precommit, or commit vote from validators for
+// consensus.
+type Vote struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Type             SignedMsgType `protobuf:"varint,1,opt,name=type,proto3,enum=api.SignedMsgType" json:"type,omitempty"`
+	Height           int64         `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`
+	Round            int32         `protobuf:"varint,3,opt,name=round,proto3" json:"round,omitempty"`
+	BlockId          *BlockID      `protobuf:"bytes,4,opt,name=block_id,json=blockId,proto3" json:"block_id,omitempty"` // zero if vote is nil.
+	Timestamp        string        `protobuf:"bytes,5,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	ValidatorAddress []byte        `protobuf:"bytes,6,opt,name=validator_address,json=validatorAddress,proto3" json:"validator_address,omitempty"`
+	ValidatorIndex   int32         `protobuf:"varint,7,opt,name=validator_index,json=validatorIndex,proto3" json:"validator_index,omitempty"`
+	Signature        []byte        `protobuf:"bytes,8,opt,name=signature,proto3" json:"signature,omitempty"`
+}
+
+func (x *Vote) Reset() {
+	*x = Vote{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Vote) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Vote) ProtoMessage() {}
+
+func (x *Vote) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Vote.ProtoReflect.Descriptor instead.
+func (*Vote) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *Vote) GetType() SignedMsgType {
+	if x != nil {
+		return x.Type
+	}
+	return SignedMsgType_SIGNED_MSG_TYPE_UNKNOWN
+}
+
+func (x *Vote) GetHeight() int64 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+func (x *Vote) GetRound() int32 {
+	if x != nil {
+		return x.Round
+	}
+	return 0
+}
+
+func (x *Vote) GetBlockId() *BlockID {
+	if x != nil {
+		return x.BlockId
+	}
+	return nil
+}
+
+func (x *Vote) GetTimestamp() string {
+	if x != nil {
+		return x.Timestamp
+	}
+	return ""
+}
+
+func (x *Vote) GetValidatorAddress() []byte {
+	if x != nil {
+		return x.ValidatorAddress
+	}
+	return nil
+}
+
+func (x *Vote) GetValidatorIndex() int32 {
+	if x != nil {
+		return x.ValidatorIndex
+	}
+	return 0
+}
+
+func (x *Vote) GetSignature() []byte {
+	if x != nil {
+		return x.Signature
+	}
+	return nil
+}
+
+// DuplicateVoteEvidence contains evidence of a validator signed two conflicting votes.
+type DuplicateVoteEvidence struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	VoteA            *Vote  `protobuf:"bytes,1,opt,name=vote_a,json=voteA,proto3" json:"vote_a,omitempty"`
+	VoteB            *Vote  `protobuf:"bytes,2,opt,name=vote_b,json=voteB,proto3" json:"vote_b,omitempty"`
+	TotalVotingPower int64  `protobuf:"varint,3,opt,name=total_voting_power,json=totalVotingPower,proto3" json:"total_voting_power,omitempty"`
+	ValidatorPower   int64  `protobuf:"varint,4,opt,name=validator_power,json=validatorPower,proto3" json:"validator_power,omitempty"`
+	Timestamp        string `protobuf:"bytes,5,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+}
+
+func (x *DuplicateVoteEvidence) Reset() {
+	*x = DuplicateVoteEvidence{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DuplicateVoteEvidence) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DuplicateVoteEvidence) ProtoMessage() {}
+
+func (x *DuplicateVoteEvidence) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DuplicateVoteEvidence.ProtoReflect.Descriptor instead.
+func (*DuplicateVoteEvidence) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *DuplicateVoteEvidence) GetVoteA() *Vote {
+	if x != nil {
+		return x.VoteA
+	}
+	return nil
+}
+
+func (x *DuplicateVoteEvidence) GetVoteB() *Vote {
+	if x != nil {
+		return x.VoteB
+	}
+	return nil
+}
+
+func (x *DuplicateVoteEvidence) GetTotalVotingPower() int64 {
+	if x != nil {
+		return x.TotalVotingPower
+	}
+	return 0
+}
+
+func (x *DuplicateVoteEvidence) GetValidatorPower() int64 {
+	if x != nil {
+		return x.ValidatorPower
+	}
+	return 0
+}
+
+func (x *DuplicateVoteEvidence) GetTimestamp() string {
+	if x != nil {
+		return x.Timestamp
+	}
+	return ""
+}
+
+type SignedHeader struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Header *Header `protobuf:"bytes,1,opt,name=header,proto3" json:"header,omitempty"`
+	Commit *Commit `protobuf:"bytes,2,opt,name=commit,proto3" json:"commit,omitempty"`
+}
+
+func (x *SignedHeader) Reset() {
+	*x = SignedHeader{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SignedHeader) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SignedHeader) ProtoMessage() {}
+
+func (x *SignedHeader) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SignedHeader.ProtoReflect.Descriptor instead.
+func (*SignedHeader) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SignedHeader) GetHeader() *Header {
+	if x != nil {
+		return x.Header
+	}
+	return nil
+}
+
+func (x *SignedHeader) GetCommit() *Commit {
+	if x != nil {
+		return x.Commit
+	}
+	return nil
+}
+
+type ValidatorSet struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Validators       []*Validator `protobuf:"bytes,1,rep,name=validators,proto3" json:"validators,omitempty"`
+	Proposer         *Validator   `protobuf:"bytes,2,opt,name=proposer,proto3" json:"proposer,omitempty"`
+	TotalVotingPower int64        `protobuf:"varint,3,opt,name=total_voting_power,json=totalVotingPower,proto3" json:"total_voting_power,omitempty"`
+}
+
+func (x *ValidatorSet) Reset() {
+	*x = ValidatorSet{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ValidatorSet) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidatorSet) ProtoMessage() {}
+
+func (x *ValidatorSet) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidatorSet.ProtoReflect.Descriptor instead.
+func (*ValidatorSet) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ValidatorSet) GetValidators() []*Validator {
+	if x != nil {
+		return x.Validators
+	}
+	return nil
+}
+
+func (x *ValidatorSet) GetProposer() *Validator {
+	if x != nil {
+		return x.Proposer
+	}
+	return nil
+}
+
+func (x *ValidatorSet) GetTotalVotingPower() int64 {
+	if x != nil {
+		return x.TotalVotingPower
+	}
+	return 0
+}
+
+type LightBlock struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	SignedHeader *SignedHeader `protobuf:"bytes,1,opt,name=signed_header,json=signedHeader,proto3" json:"signed_header,omitempty"`
+	ValidatorSet *ValidatorSet `protobuf:"bytes,2,opt,name=validator_set,json=validatorSet,proto3" json:"validator_set,omitempty"`
+}
+
+func (x *LightBlock) Reset() {
+	*x = LightBlock{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LightBlock) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LightBlock) ProtoMessage() {}
+
+func (x *LightBlock) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LightBlock.ProtoReflect.Descriptor instead.
+func (*LightBlock) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *LightBlock) GetSignedHeader() *SignedHeader {
+	if x != nil {
+		return x.SignedHeader
+	}
+	return nil
+}
+
+func (x *LightBlock) GetValidatorSet() *ValidatorSet {
+	if x != nil {
+		return x.ValidatorSet
+	}
+	return nil
+}
+
+// LightClientAttackEvidence contains evidence of a set of validators attempting to mislead a light client.
+type LightClientAttackEvidence struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ConflictingBlock    *LightBlock  `protobuf:"bytes,1,opt,name=conflicting_block,json=conflictingBlock,proto3" json:"conflicting_block,omitempty"`
+	CommonHeight        int64        `protobuf:"varint,2,opt,name=common_height,json=commonHeight,proto3" json:"common_height,omitempty"`
+	ByzantineValidators []*Validator `protobuf:"bytes,3,rep,name=byzantine_validators,json=byzantineValidators,proto3" json:"byzantine_validators,omitempty"`
+	TotalVotingPower    int64        `protobuf:"varint,4,opt,name=total_voting_power,json=totalVotingPower,proto3" json:"total_voting_power,omitempty"`
+	Timestamp           string       `protobuf:"bytes,5,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+}
+
+func (x *LightClientAttackEvidence) Reset() {
+	*x = LightClientAttackEvidence{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LightClientAttackEvidence) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LightClientAttackEvidence) ProtoMessage() {}
+
+func (x *LightClientAttackEvidence) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LightClientAttackEvidence.ProtoReflect.Descriptor instead.
+func (*LightClientAttackEvidence) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *LightClientAttackEvidence) GetConflictingBlock() *LightBlock {
+	if x != nil {
+		return x.ConflictingBlock
+	}
+	return nil
+}
+
+func (x *LightClientAttackEvidence) GetCommonHeight() int64 {
+	if x != nil {
+		return x.CommonHeight
+	}
+	return 0
+}
+
+func (x *LightClientAttackEvidence) GetByzantineValidators() []*Validator {
+	if x != nil {
+		return x.ByzantineValidators
+	}
+	return nil
+}
+
+func (x *LightClientAttackEvidence) GetTotalVotingPower() int64 {
+	if x != nil {
+		return x.TotalVotingPower
+	}
+	return 0
+}
+
+func (x *LightClientAttackEvidence) GetTimestamp() string {
+	if x != nil {
+		return x.Timestamp
+	}
+	return ""
+}
+
+type EvidenceList struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Evidence []*Evidence `protobuf:"bytes,1,rep,name=evidence,proto3" json:"evidence,omitempty"`
+}
+
+func (x *EvidenceList) Reset() {
+	*x = EvidenceList{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *EvidenceList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EvidenceList) ProtoMessage() {}
+
+func (x *EvidenceList) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EvidenceList.ProtoReflect.Descriptor instead.
+func (*EvidenceList) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *EvidenceList) GetEvidence() []*Evidence {
+	if x != nil {
+		return x.Evidence
+	}
+	return nil
+}
+
+// Commit contains the evidence that a block was committed by a set of validators.
+type Commit struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Height     string       `protobuf:"bytes,1,opt,name=height,proto3" json:"height,omitempty"`
+	Round      int32        `protobuf:"varint,2,opt,name=round,proto3" json:"round,omitempty"`
+	BlockId    *BlockID     `protobuf:"bytes,3,opt,name=block_id,json=blockId,proto3" json:"block_id,omitempty"`
+	Signatures []*CommitSig `protobuf:"bytes,4,rep,name=signatures,proto3" json:"signatures,omitempty"`
+}
+
+func (x *Commit) Reset() {
+	*x = Commit{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Commit) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Commit) ProtoMessage() {}
+
+func (x *Commit) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Commit.ProtoReflect.Descriptor instead.
+func (*Commit) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *Commit) GetHeight() string {
+	if x != nil {
+		return x.Height
+	}
+	return ""
+}
+
+func (x *Commit) GetRound() int32 {
+	if x != nil {
+		return x.Round
+	}
+	return 0
+}
+
+func (x *Commit) GetBlockId() *BlockID {
+	if x != nil {
+		return x.BlockId
+	}
+	return nil
+}
+
+func (x *Commit) GetSignatures() []*CommitSig {
+	if x != nil {
+		return x.Signatures
+	}
+	return nil
+}
+
+// CommitSig is a part of the Vote included in a Commit.
+type CommitSig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	BlockIdFlag      BlockIDFlag `protobuf:"varint,1,opt,name=block_id_flag,json=blockIdFlag,proto3,enum=api.BlockIDFlag" json:"block_id_flag,omitempty"`
+	ValidatorAddress []byte      `protobuf:"bytes,2,opt,name=validator_address,json=validatorAddress,proto3" json:"validator_address,omitempty"`
+	Timestamp        string      `protobuf:"bytes,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Signature        []byte      `protobuf:"bytes,4,opt,name=signature,proto3" json:"signature,omitempty"`
+}
+
+func (x *CommitSig) Reset() {
+	*x = CommitSig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CommitSig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommitSig) ProtoMessage() {}
+
+func (x *CommitSig) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommitSig.ProtoReflect.Descriptor instead.
+func (*CommitSig) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *CommitSig) GetBlockIdFlag() BlockIDFlag {
+	if x != nil {
+		return x.BlockIdFlag
+	}
+	return BlockIDFlag_BLOCK_ID_FLAG_UNKNOWN
+}
+
+func (x *CommitSig) GetValidatorAddress() []byte {
+	if x != nil {
+		return x.ValidatorAddress
+	}
+	return nil
+}
+
+func (x *CommitSig) GetTimestamp() string {
+	if x != nil {
+		return x.Timestamp
+	}
+	return ""
+}
+
+func (x *CommitSig) GetSignature() []byte {
+	if x != nil {
+		return x.Signature
+	}
+	return nil
+}
+
+// Block is tendermint type Block, with the Header proposer address
+// field converted to bech32 string.
+type Block struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Header     *Header       `protobuf:"bytes,1,opt,name=header,proto3" json:"header,omitempty"`
+	Data       *Data         `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	Evidence   *EvidenceList `protobuf:"bytes,3,opt,name=evidence,proto3" json:"evidence,omitempty"`
+	LastCommit *Commit       `protobuf:"bytes,4,opt,name=last_commit,json=lastCommit,proto3" json:"last_commit,omitempty"`
+}
+
+func (x *Block) Reset() {
+	*x = Block{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Block) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Block) ProtoMessage() {}
+
+func (x *Block) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Block.ProtoReflect.Descriptor instead.
+func (*Block) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *Block) GetHeader() *Header {
+	if x != nil {
+		return x.Header
+	}
+	return nil
+}
+
+func (x *Block) GetData() *Data {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *Block) GetEvidence() *EvidenceList {
+	if x != nil {
+		return x.Evidence
+	}
+	return nil
+}
+
+func (x *Block) GetLastCommit() *Commit {
+	if x != nil {
+		return x.LastCommit
+	}
+	return nil
+}
+
+// GetBlockByHeightResponse is the response type for the Query/GetBlockByHeight RPC method.
+type GetBlockResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	BlockId *BlockID `protobuf:"bytes,1,opt,name=block_id,json=blockId,proto3" json:"block_id,omitempty"`
+	// Since: cosmos-sdk 0.47
+	Block *Block `protobuf:"bytes,2,opt,name=block,proto3" json:"block,omitempty"`
+}
+
+func (x *GetBlockResponse) Reset() {
+	*x = GetBlockResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetBlockResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBlockResponse) ProtoMessage() {}
+
+func (x *GetBlockResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetBlockResponse.ProtoReflect.Descriptor instead.
+func (*GetBlockResponse) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GetBlockResponse) GetBlockId() *BlockID {
+	if x != nil {
+		return x.BlockId
+	}
+	return nil
+}
+
+func (x *GetBlockResponse) GetBlock() *Block {
+	if x != nil {
+		return x.Block
+	}
+	return nil
+}
+
+// GetLatestBlockRequest is the request type for the Query/GetLatestBlock RPC method.
+type GetLatestBlockRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *GetLatestBlockRequest) Reset() {
+	*x = GetLatestBlockRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetLatestBlockRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLatestBlockRequest) ProtoMessage() {}
+
+func (x *GetLatestBlockRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLatestBlockRequest.ProtoReflect.Descriptor instead.
+func (*GetLatestBlockRequest) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{19}
+}
+
+type RestApiResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Status string `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Result string `protobuf:"bytes,2,opt,name=result,proto3" json:"result,omitempty"`
+}
+
+func (x *RestApiResponse) Reset() {
+	*x = RestApiResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tendermint_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RestApiResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RestApiResponse) ProtoMessage() {}
+
+func (x *RestApiResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_tendermint_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RestApiResponse.ProtoReflect.Descriptor instead.
+func (*RestApiResponse) Descriptor() ([]byte, []int) {
+	return file_tendermint_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *RestApiResponse) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *RestApiResponse) GetResult() string {
 	if x != nil {
 		return x.Result
 	}
-	return 0
+	return ""
 }
 
 var File_tendermint_proto protoreflect.FileDescriptor
 
 var file_tendermint_proto_rawDesc = []byte{
 	0x0a, 0x10, 0x74, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x74, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x12, 0x03, 0x61, 0x70, 0x69, 0x22, 0x0e, 0x0a, 0x0c, 0x45, 0x6d, 0x70, 0x74, 0x79,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x25, 0x0a, 0x0b, 0x41, 0x64, 0x64, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x32, 0x3d,
-	0x0a, 0x0a, 0x54, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x74, 0x12, 0x2f, 0x0a, 0x06,
-	0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x12, 0x11, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x45, 0x6d, 0x70,
-	0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x10, 0x2e, 0x61, 0x70, 0x69, 0x2e,
-	0x41, 0x64, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x04, 0x5a,
-	0x02, 0x2e, 0x2f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x6f, 0x12, 0x03, 0x61, 0x70, 0x69, 0x1a, 0x19, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x61, 0x6e, 0x79, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x1a, 0x20, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x62, 0x75, 0x66, 0x2f, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x6f, 0x72, 0x2e, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x22, 0xa4, 0x01, 0x0a, 0x09, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74,
+	0x6f, 0x72, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x12, 0x2d, 0x0a, 0x07,
+	0x70, 0x75, 0x62, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e,
+	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
+	0x41, 0x6e, 0x79, 0x52, 0x06, 0x70, 0x75, 0x62, 0x4b, 0x65, 0x79, 0x12, 0x21, 0x0a, 0x0c, 0x76,
+	0x6f, 0x74, 0x69, 0x6e, 0x67, 0x5f, 0x70, 0x6f, 0x77, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x0b, 0x76, 0x6f, 0x74, 0x69, 0x6e, 0x67, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x12, 0x2b,
+	0x0a, 0x11, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x72, 0x5f, 0x70, 0x72, 0x69, 0x6f, 0x72,
+	0x69, 0x74, 0x79, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x10, 0x70, 0x72, 0x6f, 0x70, 0x6f,
+	0x73, 0x65, 0x72, 0x50, 0x72, 0x69, 0x6f, 0x72, 0x69, 0x74, 0x79, 0x22, 0x31, 0x0a, 0x17, 0x47,
+	0x65, 0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x42, 0x79, 0x48, 0x65, 0x69, 0x67, 0x68, 0x74, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x22, 0x39,
+	0x0a, 0x0d, 0x50, 0x61, 0x72, 0x74, 0x53, 0x65, 0x74, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x12,
+	0x14, 0x0a, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x05,
+	0x74, 0x6f, 0x74, 0x61, 0x6c, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0c, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x22, 0x47, 0x0a, 0x07, 0x42, 0x6c, 0x6f,
+	0x63, 0x6b, 0x49, 0x44, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0c, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x12, 0x28, 0x0a, 0x05, 0x70, 0x61, 0x72, 0x74,
+	0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x61,
+	0x72, 0x74, 0x53, 0x65, 0x74, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x52, 0x05, 0x70, 0x61, 0x72,
+	0x74, 0x73, 0x22, 0x18, 0x0a, 0x04, 0x44, 0x61, 0x74, 0x61, 0x12, 0x10, 0x0a, 0x03, 0x74, 0x78,
+	0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0c, 0x52, 0x03, 0x74, 0x78, 0x73, 0x22, 0x33, 0x0a, 0x09,
+	0x43, 0x6f, 0x6e, 0x73, 0x65, 0x6e, 0x73, 0x75, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x62, 0x6c, 0x6f,
+	0x63, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x12,
+	0x10, 0x0a, 0x03, 0x61, 0x70, 0x70, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x61, 0x70,
+	0x70, 0x22, 0x8b, 0x04, 0x0a, 0x06, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x12, 0x28, 0x0a, 0x07,
+	0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6e, 0x73, 0x65, 0x6e, 0x73, 0x75, 0x73, 0x52, 0x07, 0x76,
+	0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x19, 0x0a, 0x08, 0x63, 0x68, 0x61, 0x69, 0x6e, 0x5f,
+	0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x68, 0x61, 0x69, 0x6e, 0x49,
+	0x64, 0x12, 0x16, 0x0a, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x69, 0x6d,
+	0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x12, 0x30, 0x0a,
+	0x0d, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x05,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x42, 0x6c, 0x6f, 0x63, 0x6b,
+	0x49, 0x44, 0x52, 0x0b, 0x6c, 0x61, 0x73, 0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x49, 0x64, 0x12,
+	0x28, 0x0a, 0x10, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x63, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x5f, 0x68,
+	0x61, 0x73, 0x68, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0e, 0x6c, 0x61, 0x73, 0x74, 0x43,
+	0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x48, 0x61, 0x73, 0x68, 0x12, 0x1b, 0x0a, 0x09, 0x64, 0x61, 0x74,
+	0x61, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x08, 0x64, 0x61,
+	0x74, 0x61, 0x48, 0x61, 0x73, 0x68, 0x12, 0x27, 0x0a, 0x0f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61,
+	0x74, 0x6f, 0x72, 0x73, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0c, 0x52,
+	0x0e, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x73, 0x48, 0x61, 0x73, 0x68, 0x12,
+	0x30, 0x0a, 0x14, 0x6e, 0x65, 0x78, 0x74, 0x5f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f,
+	0x72, 0x73, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x12, 0x6e,
+	0x65, 0x78, 0x74, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x73, 0x48, 0x61, 0x73,
+	0x68, 0x12, 0x25, 0x0a, 0x0e, 0x63, 0x6f, 0x6e, 0x73, 0x65, 0x6e, 0x73, 0x75, 0x73, 0x5f, 0x68,
+	0x61, 0x73, 0x68, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0d, 0x63, 0x6f, 0x6e, 0x73, 0x65,
+	0x6e, 0x73, 0x75, 0x73, 0x48, 0x61, 0x73, 0x68, 0x12, 0x19, 0x0a, 0x08, 0x61, 0x70, 0x70, 0x5f,
+	0x68, 0x61, 0x73, 0x68, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x07, 0x61, 0x70, 0x70, 0x48,
+	0x61, 0x73, 0x68, 0x12, 0x2a, 0x0a, 0x11, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x72, 0x65, 0x73, 0x75,
+	0x6c, 0x74, 0x73, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0f,
+	0x6c, 0x61, 0x73, 0x74, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x73, 0x48, 0x61, 0x73, 0x68, 0x12,
+	0x23, 0x0a, 0x0d, 0x65, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65, 0x5f, 0x68, 0x61, 0x73, 0x68,
+	0x18, 0x0d, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0c, 0x65, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65,
+	0x48, 0x61, 0x73, 0x68, 0x12, 0x29, 0x0a, 0x10, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x72,
+	0x5f, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x0e, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0f,
+	0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x72, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x22,
+	0xca, 0x01, 0x0a, 0x08, 0x45, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65, 0x12, 0x54, 0x0a, 0x17,
+	0x64, 0x75, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x65, 0x5f, 0x76, 0x6f, 0x74, 0x65, 0x5f, 0x65,
+	0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x44, 0x75, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x65, 0x56, 0x6f, 0x74,
+	0x65, 0x45, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65, 0x48, 0x00, 0x52, 0x15, 0x64, 0x75, 0x70,
+	0x6c, 0x69, 0x63, 0x61, 0x74, 0x65, 0x56, 0x6f, 0x74, 0x65, 0x45, 0x76, 0x69, 0x64, 0x65, 0x6e,
+	0x63, 0x65, 0x12, 0x61, 0x0a, 0x1c, 0x6c, 0x69, 0x67, 0x68, 0x74, 0x5f, 0x63, 0x6c, 0x69, 0x65,
+	0x6e, 0x74, 0x5f, 0x61, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x5f, 0x65, 0x76, 0x69, 0x64, 0x65, 0x6e,
+	0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1e, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x4c,
+	0x69, 0x67, 0x68, 0x74, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b,
+	0x45, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65, 0x48, 0x00, 0x52, 0x19, 0x6c, 0x69, 0x67, 0x68,
+	0x74, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x45, 0x76, 0x69,
+	0x64, 0x65, 0x6e, 0x63, 0x65, 0x42, 0x05, 0x0a, 0x03, 0x73, 0x75, 0x6d, 0x22, 0x97, 0x02, 0x0a,
+	0x04, 0x56, 0x6f, 0x74, 0x65, 0x12, 0x26, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x12, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x69, 0x67, 0x6e, 0x65, 0x64,
+	0x4d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x16, 0x0a,
+	0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x68,
+	0x65, 0x69, 0x67, 0x68, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x72, 0x6f, 0x75, 0x6e, 0x64, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x72, 0x6f, 0x75, 0x6e, 0x64, 0x12, 0x27, 0x0a, 0x08, 0x62,
+	0x6c, 0x6f, 0x63, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x49, 0x44, 0x52, 0x07, 0x62, 0x6c, 0x6f,
+	0x63, 0x6b, 0x49, 0x64, 0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d,
+	0x70, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61,
+	0x6d, 0x70, 0x12, 0x2b, 0x0a, 0x11, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x5f,
+	0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x10, 0x76,
+	0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x12,
+	0x27, 0x0a, 0x0f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x69, 0x6e, 0x64,
+	0x65, 0x78, 0x18, 0x07, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0e, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61,
+	0x74, 0x6f, 0x72, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x12, 0x1c, 0x0a, 0x09, 0x73, 0x69, 0x67, 0x6e,
+	0x61, 0x74, 0x75, 0x72, 0x65, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x09, 0x73, 0x69, 0x67,
+	0x6e, 0x61, 0x74, 0x75, 0x72, 0x65, 0x22, 0xd0, 0x01, 0x0a, 0x15, 0x44, 0x75, 0x70, 0x6c, 0x69,
+	0x63, 0x61, 0x74, 0x65, 0x56, 0x6f, 0x74, 0x65, 0x45, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65,
+	0x12, 0x20, 0x0a, 0x06, 0x76, 0x6f, 0x74, 0x65, 0x5f, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x56, 0x6f, 0x74, 0x65, 0x52, 0x05, 0x76, 0x6f, 0x74,
+	0x65, 0x41, 0x12, 0x20, 0x0a, 0x06, 0x76, 0x6f, 0x74, 0x65, 0x5f, 0x62, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x56, 0x6f, 0x74, 0x65, 0x52, 0x05, 0x76,
+	0x6f, 0x74, 0x65, 0x42, 0x12, 0x2c, 0x0a, 0x12, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x76, 0x6f,
+	0x74, 0x69, 0x6e, 0x67, 0x5f, 0x70, 0x6f, 0x77, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x10, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x56, 0x6f, 0x74, 0x69, 0x6e, 0x67, 0x50, 0x6f, 0x77,
+	0x65, 0x72, 0x12, 0x27, 0x0a, 0x0f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x5f,
+	0x70, 0x6f, 0x77, 0x65, 0x72, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0e, 0x76, 0x61, 0x6c,
+	0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x12, 0x1c, 0x0a, 0x09, 0x74,
+	0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09,
+	0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x22, 0x58, 0x0a, 0x0c, 0x53, 0x69, 0x67,
+	0x6e, 0x65, 0x64, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x12, 0x23, 0x0a, 0x06, 0x68, 0x65, 0x61,
+	0x64, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0b, 0x2e, 0x61, 0x70, 0x69, 0x2e,
+	0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x52, 0x06, 0x68, 0x65, 0x61, 0x64, 0x65, 0x72, 0x12, 0x23,
+	0x0a, 0x06, 0x63, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0b,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x52, 0x06, 0x63, 0x6f, 0x6d,
+	0x6d, 0x69, 0x74, 0x22, 0x98, 0x01, 0x0a, 0x0c, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f,
+	0x72, 0x53, 0x65, 0x74, 0x12, 0x2e, 0x0a, 0x0a, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f,
+	0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x56,
+	0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x52, 0x0a, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61,
+	0x74, 0x6f, 0x72, 0x73, 0x12, 0x2a, 0x0a, 0x08, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x72,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x56, 0x61, 0x6c,
+	0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x52, 0x08, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x72,
+	0x12, 0x2c, 0x0a, 0x12, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x76, 0x6f, 0x74, 0x69, 0x6e, 0x67,
+	0x5f, 0x70, 0x6f, 0x77, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x10, 0x74, 0x6f,
+	0x74, 0x61, 0x6c, 0x56, 0x6f, 0x74, 0x69, 0x6e, 0x67, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x22, 0x7c,
+	0x0a, 0x0a, 0x4c, 0x69, 0x67, 0x68, 0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x12, 0x36, 0x0a, 0x0d,
+	0x73, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x5f, 0x68, 0x65, 0x61, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x69, 0x67, 0x6e, 0x65, 0x64,
+	0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x52, 0x0c, 0x73, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x48, 0x65,
+	0x61, 0x64, 0x65, 0x72, 0x12, 0x36, 0x0a, 0x0d, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f,
+	0x72, 0x5f, 0x73, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x53, 0x65, 0x74, 0x52, 0x0c,
+	0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x53, 0x65, 0x74, 0x22, 0x8d, 0x02, 0x0a,
+	0x19, 0x4c, 0x69, 0x67, 0x68, 0x74, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x41, 0x74, 0x74, 0x61,
+	0x63, 0x6b, 0x45, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65, 0x12, 0x3c, 0x0a, 0x11, 0x63, 0x6f,
+	0x6e, 0x66, 0x6c, 0x69, 0x63, 0x74, 0x69, 0x6e, 0x67, 0x5f, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x4c, 0x69, 0x67, 0x68,
+	0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x52, 0x10, 0x63, 0x6f, 0x6e, 0x66, 0x6c, 0x69, 0x63, 0x74,
+	0x69, 0x6e, 0x67, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x12, 0x23, 0x0a, 0x0d, 0x63, 0x6f, 0x6d, 0x6d,
+	0x6f, 0x6e, 0x5f, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x0c, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x48, 0x65, 0x69, 0x67, 0x68, 0x74, 0x12, 0x41, 0x0a,
+	0x14, 0x62, 0x79, 0x7a, 0x61, 0x6e, 0x74, 0x69, 0x6e, 0x65, 0x5f, 0x76, 0x61, 0x6c, 0x69, 0x64,
+	0x61, 0x74, 0x6f, 0x72, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x52, 0x13, 0x62, 0x79, 0x7a,
+	0x61, 0x6e, 0x74, 0x69, 0x6e, 0x65, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x73,
+	0x12, 0x2c, 0x0a, 0x12, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x76, 0x6f, 0x74, 0x69, 0x6e, 0x67,
+	0x5f, 0x70, 0x6f, 0x77, 0x65, 0x72, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x10, 0x74, 0x6f,
+	0x74, 0x61, 0x6c, 0x56, 0x6f, 0x74, 0x69, 0x6e, 0x67, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x12, 0x1c,
+	0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x05, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x22, 0x39, 0x0a, 0x0c,
+	0x45, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x29, 0x0a, 0x08,
+	0x65, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0d,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x45, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x08, 0x65,
+	0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65, 0x22, 0x8f, 0x01, 0x0a, 0x06, 0x43, 0x6f, 0x6d, 0x6d,
+	0x69, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x72, 0x6f,
+	0x75, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x72, 0x6f, 0x75, 0x6e, 0x64,
+	0x12, 0x27, 0x0a, 0x08, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x49, 0x44,
+	0x52, 0x07, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x49, 0x64, 0x12, 0x2e, 0x0a, 0x0a, 0x73, 0x69, 0x67,
+	0x6e, 0x61, 0x74, 0x75, 0x72, 0x65, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x53, 0x69, 0x67, 0x52, 0x0a, 0x73,
+	0x69, 0x67, 0x6e, 0x61, 0x74, 0x75, 0x72, 0x65, 0x73, 0x22, 0xaa, 0x01, 0x0a, 0x09, 0x43, 0x6f,
+	0x6d, 0x6d, 0x69, 0x74, 0x53, 0x69, 0x67, 0x12, 0x34, 0x0a, 0x0d, 0x62, 0x6c, 0x6f, 0x63, 0x6b,
+	0x5f, 0x69, 0x64, 0x5f, 0x66, 0x6c, 0x61, 0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x10,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x49, 0x44, 0x46, 0x6c, 0x61, 0x67,
+	0x52, 0x0b, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x49, 0x64, 0x46, 0x6c, 0x61, 0x67, 0x12, 0x2b, 0x0a,
+	0x11, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x5f, 0x61, 0x64, 0x64, 0x72, 0x65,
+	0x73, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x10, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61,
+	0x74, 0x6f, 0x72, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69,
+	0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x74,
+	0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x12, 0x1c, 0x0a, 0x09, 0x73, 0x69, 0x67, 0x6e,
+	0x61, 0x74, 0x75, 0x72, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x09, 0x73, 0x69, 0x67,
+	0x6e, 0x61, 0x74, 0x75, 0x72, 0x65, 0x22, 0xa8, 0x01, 0x0a, 0x05, 0x42, 0x6c, 0x6f, 0x63, 0x6b,
+	0x12, 0x23, 0x0a, 0x06, 0x68, 0x65, 0x61, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x0b, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x52, 0x06, 0x68,
+	0x65, 0x61, 0x64, 0x65, 0x72, 0x12, 0x1d, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x44, 0x61, 0x74, 0x61, 0x52, 0x04,
+	0x64, 0x61, 0x74, 0x61, 0x12, 0x2d, 0x0a, 0x08, 0x65, 0x76, 0x69, 0x64, 0x65, 0x6e, 0x63, 0x65,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x45, 0x76, 0x69,
+	0x64, 0x65, 0x6e, 0x63, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x08, 0x65, 0x76, 0x69, 0x64, 0x65,
+	0x6e, 0x63, 0x65, 0x12, 0x2c, 0x0a, 0x0b, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x63, 0x6f, 0x6d, 0x6d,
+	0x69, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0b, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x43,
+	0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x52, 0x0a, 0x6c, 0x61, 0x73, 0x74, 0x43, 0x6f, 0x6d, 0x6d, 0x69,
+	0x74, 0x22, 0x5d, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x27, 0x0a, 0x08, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x5f, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x42, 0x6c,
+	0x6f, 0x63, 0x6b, 0x49, 0x44, 0x52, 0x07, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x49, 0x64, 0x12, 0x20,
+	0x0a, 0x05, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x52, 0x05, 0x62, 0x6c, 0x6f, 0x63, 0x6b,
+	0x22, 0x17, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x4c, 0x61, 0x74, 0x65, 0x73, 0x74, 0x42, 0x6c, 0x6f,
+	0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x41, 0x0a, 0x0f, 0x52, 0x65, 0x73,
+	0x74, 0x41, 0x70, 0x69, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06,
+	0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x2a, 0x86, 0x01, 0x0a,
+	0x0d, 0x53, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x4d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1b,
+	0x0a, 0x17, 0x53, 0x49, 0x47, 0x4e, 0x45, 0x44, 0x5f, 0x4d, 0x53, 0x47, 0x5f, 0x54, 0x59, 0x50,
+	0x45, 0x5f, 0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x10, 0x00, 0x12, 0x1b, 0x0a, 0x17, 0x53,
+	0x49, 0x47, 0x4e, 0x45, 0x44, 0x5f, 0x4d, 0x53, 0x47, 0x5f, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x50,
+	0x52, 0x45, 0x56, 0x4f, 0x54, 0x45, 0x10, 0x01, 0x12, 0x1d, 0x0a, 0x19, 0x53, 0x49, 0x47, 0x4e,
+	0x45, 0x44, 0x5f, 0x4d, 0x53, 0x47, 0x5f, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x50, 0x52, 0x45, 0x43,
+	0x4f, 0x4d, 0x4d, 0x49, 0x54, 0x10, 0x02, 0x12, 0x1c, 0x0a, 0x18, 0x53, 0x49, 0x47, 0x4e, 0x45,
+	0x44, 0x5f, 0x4d, 0x53, 0x47, 0x5f, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x50, 0x52, 0x4f, 0x50, 0x4f,
+	0x53, 0x41, 0x4c, 0x10, 0x20, 0x2a, 0x73, 0x0a, 0x0b, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x49, 0x44,
+	0x46, 0x6c, 0x61, 0x67, 0x12, 0x19, 0x0a, 0x15, 0x42, 0x4c, 0x4f, 0x43, 0x4b, 0x5f, 0x49, 0x44,
+	0x5f, 0x46, 0x4c, 0x41, 0x47, 0x5f, 0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x10, 0x00, 0x12,
+	0x18, 0x0a, 0x14, 0x42, 0x4c, 0x4f, 0x43, 0x4b, 0x5f, 0x49, 0x44, 0x5f, 0x46, 0x4c, 0x41, 0x47,
+	0x5f, 0x41, 0x42, 0x53, 0x45, 0x4e, 0x54, 0x10, 0x01, 0x12, 0x18, 0x0a, 0x14, 0x42, 0x4c, 0x4f,
+	0x43, 0x4b, 0x5f, 0x49, 0x44, 0x5f, 0x46, 0x4c, 0x41, 0x47, 0x5f, 0x43, 0x4f, 0x4d, 0x4d, 0x49,
+	0x54, 0x10, 0x02, 0x12, 0x15, 0x0a, 0x11, 0x42, 0x4c, 0x4f, 0x43, 0x4b, 0x5f, 0x49, 0x44, 0x5f,
+	0x46, 0x4c, 0x41, 0x47, 0x5f, 0x4e, 0x49, 0x4c, 0x10, 0x03, 0x32, 0x9e, 0x01, 0x0a, 0x0a, 0x54,
+	0x65, 0x6e, 0x64, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x74, 0x12, 0x45, 0x0a, 0x0e, 0x47, 0x65, 0x74,
+	0x4c, 0x61, 0x74, 0x65, 0x73, 0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x12, 0x1a, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x47, 0x65, 0x74, 0x4c, 0x61, 0x74, 0x65, 0x73, 0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x15, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x47, 0x65,
+	0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
+	0x12, 0x49, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x42, 0x6c, 0x6f, 0x63, 0x6b, 0x42, 0x79, 0x48, 0x65,
+	0x69, 0x67, 0x68, 0x74, 0x12, 0x1c, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x47, 0x65, 0x74, 0x42, 0x6c,
+	0x6f, 0x63, 0x6b, 0x42, 0x79, 0x48, 0x65, 0x69, 0x67, 0x68, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x1a, 0x15, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x47, 0x65, 0x74, 0x42, 0x6c, 0x6f, 0x63,
+	0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x08, 0x5a, 0x06, 0x2e,
+	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -132,19 +1802,72 @@ func file_tendermint_proto_rawDescGZIP() []byte {
 	return file_tendermint_proto_rawDescData
 }
 
-var file_tendermint_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_tendermint_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_tendermint_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_tendermint_proto_goTypes = []interface{}{
-	(*EmptyRequest)(nil), // 0: api.EmptyRequest
-	(*AddResponse)(nil),  // 1: api.AddResponse
+	(SignedMsgType)(0),                // 0: api.SignedMsgType
+	(BlockIDFlag)(0),                  // 1: api.BlockIDFlag
+	(*Validator)(nil),                 // 2: api.Validator
+	(*GetBlockByHeightRequest)(nil),   // 3: api.GetBlockByHeightRequest
+	(*PartSetHeader)(nil),             // 4: api.PartSetHeader
+	(*BlockID)(nil),                   // 5: api.BlockID
+	(*Data)(nil),                      // 6: api.Data
+	(*Consensus)(nil),                 // 7: api.Consensus
+	(*Header)(nil),                    // 8: api.Header
+	(*Evidence)(nil),                  // 9: api.Evidence
+	(*Vote)(nil),                      // 10: api.Vote
+	(*DuplicateVoteEvidence)(nil),     // 11: api.DuplicateVoteEvidence
+	(*SignedHeader)(nil),              // 12: api.SignedHeader
+	(*ValidatorSet)(nil),              // 13: api.ValidatorSet
+	(*LightBlock)(nil),                // 14: api.LightBlock
+	(*LightClientAttackEvidence)(nil), // 15: api.LightClientAttackEvidence
+	(*EvidenceList)(nil),              // 16: api.EvidenceList
+	(*Commit)(nil),                    // 17: api.Commit
+	(*CommitSig)(nil),                 // 18: api.CommitSig
+	(*Block)(nil),                     // 19: api.Block
+	(*GetBlockResponse)(nil),          // 20: api.GetBlockResponse
+	(*GetLatestBlockRequest)(nil),     // 21: api.GetLatestBlockRequest
+	(*RestApiResponse)(nil),           // 22: api.RestApiResponse
+	(*anypb.Any)(nil),                 // 23: google.protobuf.Any
 }
 var file_tendermint_proto_depIdxs = []int32{
-	0, // 0: api.Tendermint.Health:input_type -> api.EmptyRequest
-	1, // 1: api.Tendermint.Health:output_type -> api.AddResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	23, // 0: api.Validator.pub_key:type_name -> google.protobuf.Any
+	4,  // 1: api.BlockID.parts:type_name -> api.PartSetHeader
+	7,  // 2: api.Header.version:type_name -> api.Consensus
+	5,  // 3: api.Header.last_block_id:type_name -> api.BlockID
+	11, // 4: api.Evidence.duplicate_vote_evidence:type_name -> api.DuplicateVoteEvidence
+	15, // 5: api.Evidence.light_client_attack_evidence:type_name -> api.LightClientAttackEvidence
+	0,  // 6: api.Vote.type:type_name -> api.SignedMsgType
+	5,  // 7: api.Vote.block_id:type_name -> api.BlockID
+	10, // 8: api.DuplicateVoteEvidence.vote_a:type_name -> api.Vote
+	10, // 9: api.DuplicateVoteEvidence.vote_b:type_name -> api.Vote
+	8,  // 10: api.SignedHeader.header:type_name -> api.Header
+	17, // 11: api.SignedHeader.commit:type_name -> api.Commit
+	2,  // 12: api.ValidatorSet.validators:type_name -> api.Validator
+	2,  // 13: api.ValidatorSet.proposer:type_name -> api.Validator
+	12, // 14: api.LightBlock.signed_header:type_name -> api.SignedHeader
+	13, // 15: api.LightBlock.validator_set:type_name -> api.ValidatorSet
+	14, // 16: api.LightClientAttackEvidence.conflicting_block:type_name -> api.LightBlock
+	2,  // 17: api.LightClientAttackEvidence.byzantine_validators:type_name -> api.Validator
+	9,  // 18: api.EvidenceList.evidence:type_name -> api.Evidence
+	5,  // 19: api.Commit.block_id:type_name -> api.BlockID
+	18, // 20: api.Commit.signatures:type_name -> api.CommitSig
+	1,  // 21: api.CommitSig.block_id_flag:type_name -> api.BlockIDFlag
+	8,  // 22: api.Block.header:type_name -> api.Header
+	6,  // 23: api.Block.data:type_name -> api.Data
+	16, // 24: api.Block.evidence:type_name -> api.EvidenceList
+	17, // 25: api.Block.last_commit:type_name -> api.Commit
+	5,  // 26: api.GetBlockResponse.block_id:type_name -> api.BlockID
+	19, // 27: api.GetBlockResponse.block:type_name -> api.Block
+	21, // 28: api.Tendermint.GetLatestBlock:input_type -> api.GetLatestBlockRequest
+	3,  // 29: api.Tendermint.GetBlockByHeight:input_type -> api.GetBlockByHeightRequest
+	20, // 30: api.Tendermint.GetLatestBlock:output_type -> api.GetBlockResponse
+	20, // 31: api.Tendermint.GetBlockByHeight:output_type -> api.GetBlockResponse
+	30, // [30:32] is the sub-list for method output_type
+	28, // [28:30] is the sub-list for method input_type
+	28, // [28:28] is the sub-list for extension type_name
+	28, // [28:28] is the sub-list for extension extendee
+	0,  // [0:28] is the sub-list for field type_name
 }
 
 func init() { file_tendermint_proto_init() }
@@ -154,7 +1877,7 @@ func file_tendermint_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_tendermint_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*EmptyRequest); i {
+			switch v := v.(*Validator); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -166,7 +1889,235 @@ func file_tendermint_proto_init() {
 			}
 		}
 		file_tendermint_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AddResponse); i {
+			switch v := v.(*GetBlockByHeightRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PartSetHeader); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BlockID); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Data); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Consensus); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Header); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Evidence); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Vote); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DuplicateVoteEvidence); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SignedHeader); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ValidatorSet); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LightBlock); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LightClientAttackEvidence); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*EvidenceList); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Commit); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CommitSig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Block); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetBlockResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetLatestBlockRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tendermint_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RestApiResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -178,22 +2129,147 @@ func file_tendermint_proto_init() {
 			}
 		}
 	}
+	file_tendermint_proto_msgTypes[7].OneofWrappers = []interface{}{
+		(*Evidence_DuplicateVoteEvidence)(nil),
+		(*Evidence_LightClientAttackEvidence)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_tendermint_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   2,
+			NumEnums:      2,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_tendermint_proto_goTypes,
 		DependencyIndexes: file_tendermint_proto_depIdxs,
+		EnumInfos:         file_tendermint_proto_enumTypes,
 		MessageInfos:      file_tendermint_proto_msgTypes,
 	}.Build()
 	File_tendermint_proto = out.File
 	file_tendermint_proto_rawDesc = nil
 	file_tendermint_proto_goTypes = nil
 	file_tendermint_proto_depIdxs = nil
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConnInterface
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion6
+
+// TendermintClient is the client API for Tendermint service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type TendermintClient interface {
+	// GetLatestBlock returns the latest block.
+	GetLatestBlock(ctx context.Context, in *GetLatestBlockRequest, opts ...grpc.CallOption) (*GetBlockResponse, error)
+	// GetBlockByHeight queries block for given height.
+	GetBlockByHeight(ctx context.Context, in *GetBlockByHeightRequest, opts ...grpc.CallOption) (*GetBlockResponse, error)
+}
+
+type tendermintClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewTendermintClient(cc grpc.ClientConnInterface) TendermintClient {
+	return &tendermintClient{cc}
+}
+
+func (c *tendermintClient) GetLatestBlock(ctx context.Context, in *GetLatestBlockRequest, opts ...grpc.CallOption) (*GetBlockResponse, error) {
+	out := new(GetBlockResponse)
+	err := c.cc.Invoke(ctx, "/api.Tendermint/GetLatestBlock", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tendermintClient) GetBlockByHeight(ctx context.Context, in *GetBlockByHeightRequest, opts ...grpc.CallOption) (*GetBlockResponse, error) {
+	out := new(GetBlockResponse)
+	err := c.cc.Invoke(ctx, "/api.Tendermint/GetBlockByHeight", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// TendermintServer is the server API for Tendermint service.
+type TendermintServer interface {
+	// GetLatestBlock returns the latest block.
+	GetLatestBlock(context.Context, *GetLatestBlockRequest) (*GetBlockResponse, error)
+	// GetBlockByHeight queries block for given height.
+	GetBlockByHeight(context.Context, *GetBlockByHeightRequest) (*GetBlockResponse, error)
+}
+
+// UnimplementedTendermintServer can be embedded to have forward compatible implementations.
+type UnimplementedTendermintServer struct {
+}
+
+func (*UnimplementedTendermintServer) GetLatestBlock(context.Context, *GetLatestBlockRequest) (*GetBlockResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLatestBlock not implemented")
+}
+func (*UnimplementedTendermintServer) GetBlockByHeight(context.Context, *GetBlockByHeightRequest) (*GetBlockResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBlockByHeight not implemented")
+}
+
+func RegisterTendermintServer(s *grpc.Server, srv TendermintServer) {
+	s.RegisterService(&_Tendermint_serviceDesc, srv)
+}
+
+func _Tendermint_GetLatestBlock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLatestBlockRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TendermintServer).GetLatestBlock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Tendermint/GetLatestBlock",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TendermintServer).GetLatestBlock(ctx, req.(*GetLatestBlockRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Tendermint_GetBlockByHeight_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBlockByHeightRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TendermintServer).GetBlockByHeight(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.Tendermint/GetBlockByHeight",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TendermintServer).GetBlockByHeight(ctx, req.(*GetBlockByHeightRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Tendermint_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "api.Tendermint",
+	HandlerType: (*TendermintServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetLatestBlock",
+			Handler:    _Tendermint_GetLatestBlock_Handler,
+		},
+		{
+			MethodName: "GetBlockByHeight",
+			Handler:    _Tendermint_GetBlockByHeight_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "tendermint.proto",
 }

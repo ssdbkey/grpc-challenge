@@ -4,24 +4,26 @@ import (
 	"log"
 	"net"
 
-	"github.com/ssdbkey/grpc-challenge/pkg/adder"
-	"github.com/ssdbkey/grpc-challenge/pkg/api"
+	api "github.com/ssdbkey/grpc-challenge/pkg/api"
+	"github.com/ssdbkey/grpc-challenge/pkg/tendermint"
 	"google.golang.org/grpc"
 )
 
 func main() {
 	// Create new gRPC server instance
 	s := grpc.NewServer()
-	srv := &adder.GRPCServer{}
+	srv := &tendermint.GRPCServer{}
 
 	// Register gRPC server
-	api.RegisterAdderServer(s, srv)
+	api.RegisterTendermintServer(s, srv)
 
 	// Listen on port 8080
 	l, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Printf("listening on %v", l.Addr())
 
 	// Start gRPC server
 	if err := s.Serve(l); err != nil {
