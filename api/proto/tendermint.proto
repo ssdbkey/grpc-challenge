@@ -33,7 +33,7 @@ message PartSetHeader {
 }
 
 message BlockID {
-  bytes hash = 1;
+  string hash = 1;
   PartSetHeader parts = 2;
 }
 

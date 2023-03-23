@@ -38,4 +38,10 @@ evans api/proto/tendermint.proto
 make test
 ```
 
+- Try to run state tracker to get latest consecutive 5 blocks info(result is saved in exported.json):
+
+```console
+make run-tracker
+```
+
 - That's all!
