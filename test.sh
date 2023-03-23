@@ -1,0 +1,1 @@
+go test -mod=readonly $(go list ./...)

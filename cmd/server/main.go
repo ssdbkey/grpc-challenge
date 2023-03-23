@@ -17,8 +17,8 @@ func main() {
 	// Register gRPC server
 	api.RegisterTendermintServer(s, srv)
 
-	// Listen on port 8080
-	l, err := net.Listen("tcp", ":8080")
+	// Listen on port 50051
+	l, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatal(err)
 	}

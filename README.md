@@ -29,7 +29,13 @@ make run
 - Go to another console session and connect to gRPC server with [Evans](https://github.com/ktr0731/evans) (gRPC client):
 
 ```console
-evans api/proto/tendermint.proto -p 8080
+evans api/proto/tendermint.proto
+```
+
+- Try to run test:
+
+```console
+make test
 ```
 
 - That's all!
